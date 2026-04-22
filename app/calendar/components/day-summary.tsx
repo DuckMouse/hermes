@@ -391,6 +391,37 @@ export function DaySummary({
         // Only clear if exiting edit mode (parent controls editMode state)
     }, []);
 
+    const handleCopy = useCallback(() => {
+        const text = buildSummaryText();
+        
+        // Try modern Clipboard API first
+        if (navigator?.clipboard?.writeText) {
+            navigator.clipboard.writeText(text).catch((err) => {
+                console.error("Failed to copy with Clipboard API:", err);
+                fallbackCopy(text);
+            });
+        } else {
+            // Fallback for older browsers or when API is unavailable
+            fallbackCopy(text);
+        }
+    }, [buildSummaryText]);
+
+    const fallbackCopy = (text: string) => {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            // @ts-expect-error - execCommand is deprecated but necessary for fallback
+            document.execCommand("copy");
+        } catch (err) {
+            console.error("Fallback copy failed:", err);
+        }
+        document.body.removeChild(textarea);
+    };
+
     return (
         <SectionCard
             title={titleLabel}
@@ -400,7 +431,7 @@ export function DaySummary({
                     {hasAnyIncludedItems ? (
                         <button
                             type="button"
-                            onClick={() => navigator.clipboard.writeText(buildSummaryText())}
+                            onClick={handleCopy}
                             className="px-3 py-1.5 text-sm rounded-md border border-outline-variant/40 text-secondary hover:text-on-surface hover:border-outline transition-colors"
                         >
                             Copy
