@@ -5,6 +5,8 @@ import { TopNav } from "./components/top-nav";
 import { cn } from "@/lib/utils";
 import { getStreams } from "@/app/actions/streams";
 
+export const dynamic = "force-dynamic";
+
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({
